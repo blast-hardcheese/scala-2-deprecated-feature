@@ -4,9 +4,7 @@ object Main extends App {
   def createLogic: Logic.Aux[Instance, String] = new Logic[Instance] {
     override final type Member = String
 
-    override def abstraction: Abstraction.Aux[Instance, String] = new Abstraction[Instance] {
-      override final type Member = String
-    }
+    override def abstraction: Abstraction.Aux[Instance, String] = implicitly
 
     override def build(value: String): Data[Instance, String] = Data[Instance, String](value)
     override def func(data: Data[Instance, String]): String = data.value
