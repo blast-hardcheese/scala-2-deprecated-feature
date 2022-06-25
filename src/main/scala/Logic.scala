@@ -3,19 +3,25 @@ package help
 /*
  * A case class capable of storing a reference to some `Member`, where type alignment is enforced by consumers
  */
-case class Data[I <: Abstraction](value: I#Member)
-// Importantly, the following will not compile:
-//     case class Data[I <: Abstraction](I: I)(value: I.Member)
-// and this one can never be satisfied:
-//   class Container[I <: Abstraction](I: I) {
-//     case class Data(value: I.Member)
-//   }
+case class Data[A, M](value: M)(implicit abstraction: Abstraction.Aux[A, M])
+case class Data2[A, M](a: A, value: M)(implicit abstraction: Abstraction.Aux[A, M])
+class Container[A, M](a: A)(implicit abstraction: Abstraction.Aux[A, M]) {
+  case class Data(value: M)
+}
 
 /*
  * A class defining a collection of functions that all share the same `Abstraction`, able to accept parameterized
  * case classes, as well as return types constrained by the top-level type parameter (`I`)
  */
-abstract class Logic[I <: Abstraction] {
-  def build(value: I#Member): Data[I]
-  def func(data: Data[I]): I#Member
+abstract class Logic[A] {
+  type Member
+
+  def abstraction: Abstraction.Aux[A, Member]
+
+  def build(value: Member): Data[A, Member]
+  def func(data: Data[A, Member]): Member
+}
+
+object Logic {
+  type Aux[A, M] = Logic[A] { type Member = M }
 }
